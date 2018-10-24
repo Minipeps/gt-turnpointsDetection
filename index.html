@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<title>GT-TurnpointsDetection</title>
+
+	<script src="libraries/p5.js"></script>
+	<script src="libraries/p5.dom.js"></script>
+	<script src="libraries/p5.sound.js"></script>
+	<script src="sketch.js"></script>
+	<script src="point.js"></script>
+
+	<style>
+		body {
+			margin:0;
+			padding:0;
+			overflow: hidden;
+		}
+		canvas {
+			margin:auto;
+		}
+		.selector {
+			position: absolute;
+			top: 10px;
+			left: 10px;
+			font-family: Arial, Helvetica, sans-serif;
+		}
+		#trackToggle {
+			color: rgb(255, 52, 52)
+		}
+		#reducedToggle {
+			color: rgb(52, 52, 255)
+		}
+		#tpToggle {
+			color: rgb(52, 255, 52)
+		}
+		#noLoopToggle {
+			color: white;
+		}
+		.noLoop {
+			position: absolute;
+			bottom: 10px;
+			left: 10px;
+			font-family: Arial, Helvetica, sans-serif;
+		}
+	</style>
+</head>
+<body>
+	<div class="selector">
+		<input type="checkbox" name="trackToggle" onclick="handleClick(this)" checked ><span id="trackToggle">Original Path</span><br>
+		<input type="checkbox" name="reducedToggle" onclick="handleClick(this)"  checked><span id="reducedToggle">Reduced Path</span><br>
+		<input type="checkbox" name="tpToggle" onclick="handleClick(this)" checked><span id="tpToggle">Turnpoints Path</span><br>
+	</div>
+	<div class="noLoop">
+		<input type="checkbox" name="noLoop" onclick="handleClick(this)"><span id="noLoopToggle">NoLoop</span><br>
+	</div>
+</body>
+</html>
