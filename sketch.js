@@ -3,7 +3,7 @@ var track = [];
 var reducedTrack = [];
 var tpTrack = [], tpDist;
 var optimalTrack = [];
-var n = 10;
+var n = 1000;
 var e, tp;
 
 var trackToggle = false,
@@ -18,16 +18,17 @@ function setup() {
 	noFill();
 	// Sliders
 	sliderEps = createSlider(1, 100, 50);
-	sliderEps.position(175, 30);
-	sliderTp = createSlider(1, 5, 1);
-	sliderTp.position(350, 30);
+	sliderEps.position(350, 30);
+	sliderTp = createSlider(1, 5, 2);
+	sliderTp.position(350, 80);
 	sliderEps.input(updateEps);
 	sliderTp.input(updateTp);
-	updateEps();
-	updateTp();
 
 	generateTrack(n);
-	optimalTrack = BrutForceTwoTurnpoints(track);
+	optimalTrack = BrutForceThreeTurnpoints(track);
+
+	updateEps();
+	updateTp();
 }
 
 function draw() {
@@ -39,6 +40,15 @@ function draw() {
 	text("Epsilon: " + e, sliderEps.x + sliderEps.width/4, sliderEps.y - 10);
 	text("Turnpoints: " + tp, sliderTp.x + sliderTp.width/4, sliderTp.y - 10);
 
+	noFill();
+	stroke(255,52,52);
+	text(getPathDistance(track), 200, 25);
+	stroke(52,52,255);
+	text(getPathDistance(reducedTrack), 200, 45);
+	stroke(52,255,52);
+	text(getPathDistance(tpTrack), 200, 65);
+	stroke(255);
+	text(getPathDistance(optimalTrack), 200, 85);
 
 	drawPoints(track);
 	if (trackToggle) {
@@ -88,6 +98,14 @@ function drawPath(path, color, sw) {
 	endShape();
 }
 
+function getPathDistance(path) {
+	var d = 0;
+	for (var i=0; i<path.length-1;i++) {
+		d += path[i].distanceToPoint(path[i+1]);
+	}
+	return d;
+}
+
 function DouglasPeucker(path, epsilon) {
 	var dmax = 0, index = 0, d;
 	// Search the most distant point from the average path
@@ -116,43 +134,31 @@ function DouglasPeucker(path, epsilon) {
 function TurnPointsDetection(path, nPoints) {
 	var dmax = 0, index = 0, d;
 	// Search the most distant point from the average path
-	for (i=1; i < path.length-1; i++) {
-		d = path[i].distanceToSegment(path[0], path[path.length-1]);
+	for (var i=1; i < path.length-1; i++) {
+		d = getPathDistance([path[0], path[i], path[path.length-1]]);
 		if (d > dmax) {
 			index = i;
 			dmax = d;
 		}
 	}
 	var resultDist = 0;
-	var tempPath, resultPath = [];
+	var resultPath = [];
 	var path1, path2, dist1, dist2;
-	if (nPoints > 1 && dmax > 0) { 
-		if (nPoints % 2 == 1) { // case nPoints is odd
-			// Divide
-			[path1, dist1] = TurnPointsDetection(path.slice(0, index+1), nPoints-1);
-			[path2, dist2] = TurnPointsDetection(path.slice(index), nPoints-1);
-			// Merge
-			resultPath = path1.concat(path2.slice(1));
-			resultDist = dist1 + dist2;
-		} else { // TODO case nPoints is even
-			for (i=1; i < path.length - 1; i++) {
-				// Loop through each internal node and recursively
-				// compute nPoints-1 turnpoints complementary path
-				// keep the path that maximize the total distance
-				// Complexity ? 
-				path1 = [path[0], path[i]];
-				dist1 = path[0].distanceToPoint(path[i]);
-				[path2, dist2] = TurnPointsDetection(path.slice(i), nPoints-1);
-				if (dist1 + dist2 > resultDist) {
-					resultPath = path1.concat(path2.slice(1));
-					resultDist = dist1 + dist2;
-				}
+	if (nPoints > 1 && dmax > 0) {
+		for (var j=1; j < path.length - 1; j++) {
+			path1 = [path[0], path[j]];
+			dist1 = path[0].distanceToPoint(path[j]);
+			[path2, dist2] = TurnPointsDetection(path.slice(j), nPoints-1);
+			if (dist1 + dist2 > resultDist) {
+				resultPath = path1.concat(path2.slice(1));
+				resultDist = dist1 + dist2;
 			}
 		}
 	} else { // Endpoint, nPoints is 1
 		resultPath = [path[0], path[index], path[path.length-1]];
-		resultDist = path[0].distanceToPoint(path[index]) + path[index].distanceToPoint(path[path.length-1]);
+		resultDist = getPathDistance(resultPath);
 	}
+
 	return [resultPath, resultDist];
 }
 
@@ -162,10 +168,27 @@ function BrutForceTwoTurnpoints(path) {
 	var d, dmax = 0;
 	for (i=1; i < path.length - 2; i++) {
 		for (j=i+1; j < path.length - 1; j++) {
-			d = path[0].distanceToPoint(path[i]) + path[i].distanceToPoint(path[j]) + path[j].distanceToPoint(path[path.length-1]);
+			d = getPathDistance([path[0], path[i], path[j], path[path.length-1]]);
 			if (d > dmax) {
 				dmax = d;
 				optimalPath = [path[0], path[i], path[j], path[path.length-1]];
+			}
+		}
+	}
+	return optimalPath;
+}
+
+function BrutForceThreeTurnpoints(path) {
+	var optimalPath = [];
+	var d, dmax = 0;
+	for (i=1; i < path.length - 3; i++) {
+		for (j=i+1; j < path.length - 2; j++) {
+			for (k=j+1; k<path.length - 1; k++) {
+				d = getPathDistance([path[0], path[i], path[j], path[k], path[path.length-1]]);
+				if (d > dmax) {
+					dmax = d;
+					optimalPath = [path[0], path[i], path[j], path[k], path[path.length-1]];
+				}
 			}
 		}
 	}
