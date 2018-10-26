@@ -129,11 +129,11 @@ function DouglasPeucker(path, epsilon) {
 }
 
 /**
- * Compute recursively the longest path with nPoints turnpoints
- * C = O(n^nPoints)
+ * Compute recursively the longest path with nPoints turnpoints, 
+ * complexity is O(n^nPoints).
  * @param {Point[]} path - The input path.
  * @param {int} nPoints - The desired number of turnpoints.
- * @return {Point[]} The longest path with nPoints turnpoints
+ * @return {Point[]} The longest path with nPoints turnpoints.
  */
 function TurnPointsDetection(path, nPoints) {
 	var dmax = 0, index = 0, d;
@@ -165,8 +165,6 @@ function TurnPointsDetection(path, nPoints) {
 
 	return [resultPath, resultDist];
 }
-
-
 
 // Brute force method to obtain the two-turnpoints path. O(n**2)
 function BrutForceTwoTurnpoints(path) {
