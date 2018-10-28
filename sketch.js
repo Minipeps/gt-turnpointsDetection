@@ -34,13 +34,14 @@ function setup() {
 function draw() {
 	clear();
 	background(55);
+	noFill();
 	// Update slider values
 	strokeWeight(1);
-	stroke(255);
+	stroke(52, 52, 255);
 	text("Epsilon: " + e, sliderEps.x + sliderEps.width/4, sliderEps.y - 10);
+	stroke(52,255,52);
 	text("Turnpoints: " + tp, sliderTp.x + sliderTp.width/4, sliderTp.y - 10);
 
-	noFill();
 	stroke(255,52,52);
 	text(getPathDistance(track), 200, 25);
 	stroke(52,52,255);
@@ -136,19 +137,10 @@ function DouglasPeucker(path, epsilon) {
  * @return {Point[]} The longest path with nPoints turnpoints.
  */
 function TurnPointsDetection(path, nPoints) {
-	var dmax = 0, index = 0, d;
-	// Search the most distant point from the average path
-	for (var i=1; i < path.length-1; i++) {
-		d = getPathDistance([path[0], path[i], path[path.length-1]]);
-		if (d > dmax) {
-			index = i;
-			dmax = d;
-		}
-	}
 	var resultDist = 0;
 	var resultPath = [];
 	var path1, path2, dist1, dist2;
-	if (nPoints > 1 && dmax > 0) {
+	if (nPoints > 1) {
 		for (var j=1; j < path.length - 1; j++) {
 			path1 = [path[0], path[j]];
 			dist1 = path[0].distanceToPoint(path[j]);
@@ -159,8 +151,17 @@ function TurnPointsDetection(path, nPoints) {
 			}
 		}
 	} else { // Endpoint, nPoints is 1
+		var dmax = 0, index = 0, d;
+		// Search the most distant point from the average path
+		for (var i=1; i < path.length-1; i++) {
+			d = getPathDistance([path[0], path[i], path[path.length-1]]);
+			if (d > dmax) {
+				index = i;
+				dmax = d;
+			}
+		}
 		resultPath = [path[0], path[index], path[path.length-1]];
-		resultDist = getPathDistance(resultPath);
+		resultDist = dmax;
 	}
 
 	return [resultPath, resultDist];
